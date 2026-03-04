@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
     defaultConfig {
         applicationId "com.analiz.merkezi"
         minSdkVersion 21
@@ -9,8 +11,21 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+repositories {
+    google()
+    mavenCentral()
+    jcenter() // Firebase 2.5.2 gibi eski kütüphaneler için gerekebilir
 }
 
 dependencies {
+    // Senin kullandığın Firebase kütüphanesi
     implementation 'com.firebase:firebase-client-android:2.5.2'
 }
