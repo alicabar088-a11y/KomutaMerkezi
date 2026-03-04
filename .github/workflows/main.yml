@@ -9,14 +9,42 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
-      - name: Fix and Build
+
+      - name: Create Missing Files
         run: |
-          # Eğer gradlew bozuksa onu GitHub'ın kendi sistemiyle yeniden oluşturuyoruz
+          # Eksik olabilecek tüm temel dosyaları burada otomatik oluşturuyoruz
+          echo "include ':app'" > settings.gradle
+          
+          # app/build.gradle dosyasını sıfırdan ve hatasız oluştur
+          mkdir -p app
+          cat <<EOF > app/build.gradle
+          apply plugin: 'com.android.application'
+          android {
+              compileSdkVersion 30
+              buildToolsVersion "30.0.3"
+              defaultConfig {
+                  applicationId "com.analiz.merkezi"
+                  minSdkVersion 21
+                  targetSdkVersion 30
+                  versionCode 1
+                  versionName "1.0"
+              }
+          }
+          repositories { google(); mavenCentral(); jcenter() }
+          dependencies {
+              implementation 'com.firebase:firebase-client-android:2.5.2'
+          }
+          EOF
+
+      - name: Build with Gradle
+        run: |
+          # Gradlew motorunu kendimiz indirip kuruyoruz (Hata riskini sıfıra indirir)
           gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug
+
       - name: Upload APK
         uses: actions/upload-artifact@v2
         with:
-          name: app-debug
+          name: Komuta_Merkezi_APK
           path: app/build/outputs/apk/debug/app-debug.apk
